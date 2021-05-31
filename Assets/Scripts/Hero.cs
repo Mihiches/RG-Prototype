@@ -35,15 +35,15 @@ public class Hero : MonoBehaviour
         if (isGrounded)
             State = States.run;
         var dir = Input.GetAxis("Horizontal");
-        rb.AddForce(new Vector2(dir * speed * Time.deltaTime, 0), ForceMode2D.Impulse); 
+        rb.velocity = new Vector2(dir * speed * Time.deltaTime, rb.velocity.y); 
         sprite.flipX = dir < 0.0f;
     }
 
     void Jump()
     {
+        State = States.jump;
         rb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
-        if (!isGrounded)
-            State = States.jump;
+        
     }
 
     void Grounded()
