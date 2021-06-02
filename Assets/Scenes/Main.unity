@@ -349,9 +349,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25d44b2ac040d7f40b51b2ea5fdca968, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 720
+  speed: 1500
   life: 5
-  jumpForce: 1
+  jumpForce: 0.5
   rb: {fileID: 21489688}
   sprite: {fileID: 840809518}
   animmator: {fileID: 21489692}
