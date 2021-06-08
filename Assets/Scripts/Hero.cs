@@ -12,6 +12,9 @@ public class Hero : MonoBehaviour
     [SerializeField] SpriteRenderer sprite;
     private bool isGrounded;
     [SerializeField] Animator animmator;
+    public bool isGrounded;
+    public float checkRadius;
+    ContactFilter2D s;
 
     States State
     {
@@ -48,8 +51,8 @@ public class Hero : MonoBehaviour
 
     void Grounded()
     {
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 1f);
-        isGrounded = colliders.Length > 1;
+        
+       
     }
 
     void FixedUpdate()
