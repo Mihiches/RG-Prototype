@@ -1,5 +1,5 @@
+
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Hero : MonoBehaviour
@@ -7,57 +7,83 @@ public class Hero : MonoBehaviour
     [SerializeField] float speed = 3f;
     [SerializeField] int life = 5;
     [SerializeField] float jumpForce = 15f;
-
     [SerializeField] Rigidbody2D rb;
     [SerializeField] SpriteRenderer sprite;
-    private bool isGrounded;
+    bool isGrounded;
     [SerializeField] Animator animmator;
-    public bool isGrounded;
-    public float checkRadius;
-    ContactFilter2D s;
-
+    [SerializeField] BoxCollider2D legsCollider;
+    [SerializeField] int jumpCount = 2;
+    int jumpCountValue;
+    [SerializeField] int brakeForce = 1;
+    void Start()
+    {
+        jumpCountValue = jumpCount;
+    }
+    [SerializeField]
     States State
     {
         get { return (States)animmator.GetInteger("State"); }
         set { animmator.SetInteger("State", (int)value); }
     }
-
     void Update()
     {
-        if (isGrounded)
-            State = States.idle;
+        Grounded();
+        Fall();
+        if (isGrounded && rb.velocity.y ==0)
+              State = States.idle;
+        if (Input.GetButtonDown("Jump") && jumpCount > 0)
+            Jump();
         if (Input.GetButton("Horizontal"))
             Run();
-        if (Input.GetButton("Jump") && isGrounded)
-            Jump();
+        if (Input.GetButtonUp("Horizontal"))
+            StartCoroutine(Brake());
+        if (Input.GetButtonDown("Horizontal"))
+            StopAllCoroutines();
     }
-
-
     public void Run()
     {
         if (isGrounded)
             State = States.run;
         var dir = Input.GetAxis("Horizontal");
-        rb.velocity = new Vector2(dir * speed * Time.deltaTime, rb.velocity.y); 
+        rb.velocity = new Vector2(dir * speed, rb.velocity.y); 
         sprite.flipX = dir < 0.0f;
     }
-
     void Jump()
     {
-        State = States.jump;
-        rb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
-        
+        jumpCount--; 
+         State = States.jump;
+        rb.velocity = new Vector2(rb.velocity.x , jumpForce);
     }
-
+    void Fall()
+    {
+        if (!isGrounded && rb.velocity.y < 0)
+        {
+            State = States.fall;
+        }
+    }
     void Grounded()
     {
-        
-       
+        if (legsCollider.IsTouchingLayers(LayerMask.GetMask("ground")))
+        {
+            isGrounded = true;
+            jumpCount = jumpCountValue;
+        }
+        else
+            isGrounded = false;
     }
-
-    void FixedUpdate()
+    IEnumerator Brake()
     {
-        Grounded();
+        float moveDirection = Mathf.Sign(rb.velocity.x);
+        float currentVelocityX;
+        while (rb.velocity.x != 0)
+        {
+            if (moveDirection > 0 )
+                currentVelocityX = Mathf.Max(0, rb.velocity.x - brakeForce * Time.deltaTime);
+            else
+                currentVelocityX = Mathf.Min(0, rb.velocity.x + brakeForce * Time.deltaTime);
+            rb.velocity = new Vector2(currentVelocityX, rb.velocity.y);
+            yield return null;
+        }
     }
 }
 public enum States
@@ -65,5 +91,6 @@ public enum States
     idle,
     run,
     jump,
-    attack
+    attack,
+    fall
 }
